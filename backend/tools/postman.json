@@ -1,0 +1,68 @@
+{
+    "info": {
+        "name": "User and Token Account API",
+        "_postman_id": "12345678-1234-1234-1234-123456789012",
+        "description": "Collection for User and Token Account API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Create User If Not Exists",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"address\": \"user-address-123\"\n}"
+                },
+                "url": {
+                    "raw": "http://localhost:3000/api/user",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "3000",
+                    "path": [
+                        "api",
+                        "user"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Create Token Account",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"userAddress\": \"user-address-123\",\n  \"balance\": 100.0,\n  \"tokenMint\": \"token-mint-123\"\n}"
+                },
+                "url": {
+                    "raw": "http://localhost:3000/api/token-account",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "3000",
+                    "path": [
+                        "api",
+                        "token-account"
+                    ]
+                }
+            },
+            "response": []
+        }
+    ]
+}

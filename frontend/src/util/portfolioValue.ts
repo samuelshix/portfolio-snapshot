@@ -1,4 +1,4 @@
-import { TokenAccount } from "../model/tokenAccount";
+import { TokenAccount } from "../types/tokenAccount";
 
 export const getPortfolioValueByDay = (assets: TokenAccount[]) => {
     return assets.reduce((acc: { date: string, value: number }[], asset) => {

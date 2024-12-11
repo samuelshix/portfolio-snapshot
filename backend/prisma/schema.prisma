@@ -24,6 +24,8 @@ model TokenAccount {
   balance     Float
   tokenMint   String
   user        User   @relation(fields: [userAddress], references: [address])
+
+  @@unique([userAddress, tokenMint])
 }
 
 model Token {

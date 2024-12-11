@@ -1,7 +1,7 @@
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, TooltipItem } from 'chart.js';
-import { Token } from '../model/token';
-import { TokenAccount } from '../model/tokenAccount';
+import { Token } from '../types/token';
+import { TokenAccount } from '../types/tokenAccount';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 

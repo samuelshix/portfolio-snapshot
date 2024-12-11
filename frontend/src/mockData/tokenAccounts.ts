@@ -1,4 +1,4 @@
-import { TokenAccount } from "../model/tokenAccount";
+import { TokenAccount } from "../types/tokenAccount";
 
 export const heliusBalancesResponse: any = {
     "tokens": [

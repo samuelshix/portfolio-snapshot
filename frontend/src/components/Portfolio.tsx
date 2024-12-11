@@ -1,29 +1,23 @@
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { observer } from 'mobx-react-lite';
 import React, { useEffect, useState } from 'react';
-import { getAssetsByOwner } from '../api/getAssets';
 import TopBar from './TopBar';
-import { TokenAccount } from '../model/tokenAccount';
-import { getPriceData } from '../api/getPriceData';
 import Sidebar from './Sidebar';
-import TokenAccountService from '../services/tokenAccountService';
-import TokenService from '../services/tokenService';
-import { createUserIfNotExists } from '../services/apiService';
 import PriceChart from './PriceChart';
 import { getPortfolioValueByDay } from '../util/portfolioValue';
+import { tokenStore } from '../services/tokenStore';
 
-const Portfolio: React.FC = () => {
+const Portfolio = observer(() => {
     const { publicKey } = useWallet();
     const [connectWalletMessage, setMessage] = useState<string>('');
-    const [assets, setAssets] = useState<TokenAccount[]>([]);
     const [portfolioValueByDay, setPortfolioValueByDay] = useState<{ date: string, value: number }[]>([]);
     const [totalPortfolioValue, setTotalPortfolioValue] = useState<string>('0.00');
+
     useEffect(() => {
         const fetchAssets = async () => {
             if (publicKey) {
-                await createUserIfNotExists(publicKey.toString());
                 setMessage('Loading...');
-                setAssets(await TokenAccountService.initialize(publicKey.toString()));
+                tokenStore.loadUserTokens(publicKey.toString());
                 setMessage('');
             } else {
                 setMessage('Connect your wallet to view your portfolio');
@@ -34,9 +28,8 @@ const Portfolio: React.FC = () => {
     }, [publicKey]);
 
     useEffect(() => {
-        // retrieve prices
-        const fetchPrices = async () => {
-            setPortfolioValueByDay(getPortfolioValueByDay(assets))
+        const calculatePortfolioValue = async () => {
+            setPortfolioValueByDay(getPortfolioValueByDay(tokenStore.tokenAccounts))
             console.log(portfolioValueByDay)
             const totalPortfolioValue = portfolioValueByDay.reduce((total, dayValue) => {
                 return { date: dayValue.date, value: total.value + (dayValue.value || 0) };
@@ -45,11 +38,10 @@ const Portfolio: React.FC = () => {
                 style: 'currency',
                 currency: 'USD',
             });
-            console.log(totalPortfolioValue)
             setTotalPortfolioValue(formattedTotalPortfolioValue)
         }
-        if (assets.length > 0) fetchPrices()
-    }, [assets])
+        if (tokenStore.tokenAccounts.length > 0) calculatePortfolioValue()
+    }, [tokenStore.tokenAccounts])
 
 
     return (
@@ -93,10 +85,10 @@ const Portfolio: React.FC = () => {
                     </div>
                 </div>
             </div>
-            <Sidebar tokenAccounts={assets} />
+            <Sidebar tokenAccounts={tokenStore.tokenAccounts} />
         </>
     );
-};
+});
 
 export default Portfolio;
 

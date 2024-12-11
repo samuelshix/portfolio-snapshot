@@ -1,46 +1,96 @@
-# Getting Started with Create React App
+# Solana Token Portfolio Tracker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A full-stack application that tracks token balances and prices for Solana wallets, providing historical price data and portfolio management capabilities.
 
-## Available Scripts
+## Architecture Overview
 
-In the project directory, you can run:
+### Frontend (React + MobX)
 
-### `npm start`
+The frontend uses React with MobX for state management, providing real-time updates of token balances and prices.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Key Components:
+- **TokenStore**: Central state management for token data using MobX
+- **API Service**: Handles all communication with the backend
+- **DataMapperService**: Transforms API responses into frontend data structures
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### Backend (Node.js + Express + Prisma)
 
-### `npm test`
+The backend integrates multiple external APIs and maintains a database of token data.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+#### External API Clients
 
-### `npm run build`
+1. **HeliusClient**
+   - Fetches token balances for user wallets
+   - Provides token metadata
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. **BirdeyeClient**
+   - Retrieves current and historical token prices
+   - Supports price tracking over customizable time periods
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. **JupiterClient**
+   - Fetches comprehensive token metadata
+   - Provides token list with accurate decimals and symbols
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+#### Core Services
 
-### `npm run eject`
+1. **TokenService**
+   - Manages token data and price history
+   - Integrates Jupiter metadata with Birdeye prices
+   - Handles database operations for tokens
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+2. **UserService**
+   - Manages user accounts and their token holdings
+   - Synchronizes token balances with Helius data
+   - Maintains user portfolio state
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+3. **TokenAccountService**
+   - Handles token balance tracking
+   - Maps raw API data to database structures
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Database (PostgreSQL + Prisma)
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+Stores:
+- User accounts
+- Token metadata
+- Historical price data
+- Token balances
 
-## Learn More
+## Data Flow
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. User connects wallet
+2. Backend fetches token balances from Helius
+3. For each token:
+   - Retrieves metadata from Jupiter
+   - Fetches prices from Birdeye
+   - Stores data in database
+4. Frontend displays portfolio with real-time updates
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## API Endpoints
+
+### Users
+- `GET /api/users/withTokens`: Get user data with all token holdings
+- `POST /api/users/newUser`: Create new user
+
+### Tokens
+- `GET /api/tokens/token`: Get token metadata and prices
+- `POST /api/tokens/setToken`: Save new token data
+
+### Token Accounts
+- `GET /api/token-accounts/getBalances`: Get user token balances
+- `POST /api/token-accounts/createTokenAccount`: Create new token account
+
+## Setup and Installation
+
+[Add installation instructions here]
+
+## Environment Variables
+
+Required environment variables:
+- `HELIUS_API_KEY`: API key for Helius
+- `BIRDEYE_API_KEY`: API key for Birdeye
+- `DATABASE_URL`: PostgreSQL connection string
+- `PORT`: Backend server port
+
+## Development
+
+[Add development instructions here]

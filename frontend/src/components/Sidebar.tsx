@@ -1,6 +1,6 @@
 import React from 'react';
 import StocksList from './StocksList';
-import { TokenAccount } from '../model/tokenAccount';
+import { TokenAccount } from '../types/tokenAccount';
 
 
 interface SidebarProps {

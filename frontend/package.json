@@ -13,8 +13,6 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.119",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
     "axios": "^1.7.7",
     "chart.js": "^4.4.6",
     "dotenv": "^16.4.5",
@@ -33,10 +31,10 @@
     "crypto": false
   },
   "scripts": {
-    "start": "react-scripts start",
-    "start:prod": "cross-env REACT_APP_ENV=production react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start:prod": "cross-env REACT_APP_ENV=production react-app-rewired start",
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "save-tokens": "ts-node scripts/saveAllTokenPrices.ts"
   },
@@ -59,6 +57,17 @@
     ]
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.14"
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.1",
+    "https-browserify": "^1.0.0",
+    "process": "^0.11.10",
+    "react-app-rewired": "^2.2.1",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "tailwindcss": "^3.4.14",
+    "url": "^0.11.4"
   }
 }

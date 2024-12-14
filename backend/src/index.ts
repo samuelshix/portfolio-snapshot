@@ -1,17 +1,19 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-require('dotenv').config();
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import dotenv from 'dotenv';
+
+import userRoutes from './routes/userRoutes';
+import tokenAccountRoutes from './routes/tokenAccountRoutes';
+import tokenRoutes from './routes/tokenRoutes';
+
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(bodyParser.json());
-
-const userRoutes = require('./src/routes/userRoutes');
-const tokenAccountRoutes = require('./src/routes/tokenAccountRoutes');
-const tokenRoutes = require('./src/routes/tokenRoutes');
 
 app.use('/api/users', userRoutes);
 app.use('/api/token-accounts', tokenAccountRoutes);

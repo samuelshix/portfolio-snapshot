@@ -1,13 +1,13 @@
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, FC } from 'react';
 import TopBar from './TopBar';
 import Sidebar from './Sidebar';
 import PriceChart from './PriceChart';
 import { getPortfolioValueByDay } from '../util/portfolioValue';
 import { tokenStore } from '../services/tokenStore';
 
-const Portfolio = observer(() => {
+const Portfolio: FC = observer(() => {
     const { publicKey } = useWallet();
     const [connectWalletMessage, setMessage] = useState<string>('');
     const [portfolioValueByDay, setPortfolioValueByDay] = useState<{ date: string, value: number }[]>([]);
@@ -29,19 +29,20 @@ const Portfolio = observer(() => {
 
     useEffect(() => {
         const calculatePortfolioValue = async () => {
-            setPortfolioValueByDay(getPortfolioValueByDay(tokenStore.tokenAccounts))
-            console.log(portfolioValueByDay)
-            const totalPortfolioValue = portfolioValueByDay.reduce((total, dayValue) => {
+            const valueByDay = getPortfolioValueByDay(tokenStore.tokenAccounts);
+            setPortfolioValueByDay(valueByDay);
+
+            const totalValue = valueByDay.reduce((total, dayValue) => {
                 return { date: dayValue.date, value: total.value + (dayValue.value || 0) };
             }, { date: '', value: 0 }).value;
-            const formattedTotalPortfolioValue = totalPortfolioValue.toLocaleString('en-US', {
+
+            setTotalPortfolioValue(totalValue.toLocaleString('en-US', {
                 style: 'currency',
                 currency: 'USD',
-            });
-            setTotalPortfolioValue(formattedTotalPortfolioValue)
+            }));
         }
-        if (tokenStore.tokenAccounts.length > 0) calculatePortfolioValue()
-    }, [tokenStore.tokenAccounts])
+        if (tokenStore.tokenAccounts.length > 0) calculatePortfolioValue();
+    }, [tokenStore.tokenAccounts]);
 
 
     return (

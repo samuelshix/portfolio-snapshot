@@ -3,31 +3,48 @@ import { Token } from '../types/token';
 import { TokenAccount } from '../types/tokenAccount';
 import { User } from '../types/user';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
 interface UserWithTokenData {
     address: string;
     tokenAccounts: TokenAccount[];
 }
 
+const axiosInstance = axios.create({
+    baseURL: API_BASE_URL,
+    timeout: 10000,
+});
+
+axiosInstance.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.response?.status === 401) {
+            // Handle unauthorized
+        }
+        return Promise.reject(error);
+    }
+);
+
 export const api = {
     users: {
         getWithTokenData: (address: string) =>
-            axios.get<UserWithTokenData>(`${API_BASE_URL}/users/withTokens`, { params: { address } }),
+            axiosInstance.get<UserWithTokenData>(`/api/users`, {
+                params: { address }
+            }),
         create: (address: string) =>
-            axios.post<User>(`${API_BASE_URL}/users/newUser`, { address }),
+            axiosInstance.post<User>(`/api/users`, { address }),
     },
     tokens: {
         get: (mint: string) =>
-            axios.get<Token>(`${API_BASE_URL}/tokens/token`, { params: { mint } }),
+            axiosInstance.get<Token>(`/api/tokens/token`, { params: { mint } }),
         save: (token: Token) =>
-            axios.post<Token>(`${API_BASE_URL}/tokens/setToken`, token),
+            axiosInstance.post<Token>(`/api/tokens/setToken`, token),
     },
     tokenAccounts: {
         getBalances: (publicKey: string) =>
-            axios.get(`${API_BASE_URL}/token-accounts/getBalances`, { params: { publicKey } }),
+            axiosInstance.get(`/api/token-accounts/getBalances`, { params: { publicKey } }),
         save: (tokenAccount: TokenAccount, publicKey: string) =>
-            axios.post(`${API_BASE_URL}/token-accounts/createTokenAccount`, {
+            axiosInstance.post(`/api/token-accounts/createTokenAccount`, {
                 userAddress: publicKey,
                 tokenMint: tokenAccount.token.mint,
                 balance: tokenAccount.tokenAmount,

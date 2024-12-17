@@ -24,17 +24,19 @@ model TokenAccount {
   balance     Float
   tokenMint   String
   user        User   @relation(fields: [userAddress], references: [address])
+  token       Token  @relation(fields: [tokenMint], references: [mint])
 
   @@unique([userAddress, tokenMint])
 }
 
 model Token {
-  mint       String       @id @unique
-  name       String
-  symbol     String
-  decimals   Int
-  tokenPrice TokenPrice[]
-  logoURI    String
+  mint          String         @id @unique
+  name          String
+  symbol        String
+  decimals      Int
+  tokenPrice    TokenPrice[]
+  logoURI       String
+  tokenAccounts TokenAccount[]
 }
 
 model TokenPrice {

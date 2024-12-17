@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { TokenAccount } from '../types/tokenAccount';
-import { HeliusClient, heliusClient } from '../clients/heliusClient';
+import { TokenAccount } from '@/types/tokenAccount';
+import { HeliusClient, heliusClient } from '@/clients/heliusClient';
 
 export class TokenAccountService {
     private prisma: PrismaClient;

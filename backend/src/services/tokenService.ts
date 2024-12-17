@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { Token } from '../types/token';
-import { BirdeyeClient, birdeyeClient } from '../clients/birdeyeClient';
+import { Token } from '@/types/token';
+import { BirdeyeClient, birdeyeClient } from '@/clients/birdeyeClient';
 import axios from 'axios';
 
 export class TokenService {
@@ -32,10 +32,13 @@ export class TokenService {
         if (existingToken) {
             return {
                 ...existingToken,
-                prices: existingToken.tokenPrice.map(p => ({
-                    date: p.timestamp.toISOString(),
-                    price: p.price
-                }))
+                prices: existingToken.tokenPrice
+                    .filter(p => p.timestamp && p.price != null)
+                    .map(p => ({
+                        date: p.timestamp.toISOString(),
+                        price: Number(p.price)
+                    }))
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             };
         }
 
@@ -51,16 +54,17 @@ export class TokenService {
         const savedToken = await this.prisma.token.create({
             data: {
                 mint: token.mint,
-                name: token.name,
-                symbol: token.symbol,
-                decimals: token.decimals,
-                logoURI: token.logoURI
+                name: token.name || '',
+                symbol: token.symbol || '',
+                decimals: token.decimals || 0,
+                logoURI: token.logoURI || ''
             }
         });
 
         const currentPrice = await this.getCurrentPrice(token.mint);
         if (currentPrice) {
-            await this.getHistoricalTokenPrices(savedToken as Token, 30);
+            const tokenWithPrices = await this.getHistoricalTokenPrices(savedToken as Token, 30);
+            return tokenWithPrices || { ...savedToken, prices: [] };
         }
 
         return {
@@ -94,8 +98,15 @@ export class TokenService {
 
     private async savePrices(mint: string, prices: { date: string, price: number }[]): Promise<void> {
         try {
+            const validPrices = prices.filter(p =>
+                p.date &&
+                !isNaN(new Date(p.date).getTime()) &&
+                typeof p.price === 'number' &&
+                !isNaN(p.price)
+            );
+
             await this.prisma.tokenPrice.createMany({
-                data: prices.map(price => ({
+                data: validPrices.map(price => ({
                     tokenMint: mint,
                     timestamp: new Date(price.date),
                     price: price.price

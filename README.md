@@ -79,9 +79,6 @@ Stores:
 - `GET /api/token-accounts/getBalances`: Get user token balances
 - `POST /api/token-accounts/createTokenAccount`: Create new token account
 
-## Setup and Installation
-
-[Add installation instructions here]
 
 ## Environment Variables
 
@@ -93,4 +90,6 @@ Required environment variables:
 
 ## Development
 
-[Add development instructions here]
+run `npm i` from both `frontend/` and `backend/` directories to install dependencies.
+
+run `npm start` to start both frontend and backend.

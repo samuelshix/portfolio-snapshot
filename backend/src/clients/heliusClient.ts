@@ -8,7 +8,7 @@ export class HeliusClient {
     private static instance: HeliusClient;
     private readonly axiosInstance;
 
-    private constructor() {
+    public constructor() {
         this.axiosInstance = axios.create({
             baseURL: HELIUS_URL,
             params: {

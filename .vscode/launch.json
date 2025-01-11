@@ -9,6 +9,23 @@
             "webRoot": "${workspaceFolder}/src",
             "sourceMaps": true,
             "trace": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Jest: current file",
+            //"env": { "NODE_ENV": "test" },
+            "program": "${workspaceFolder}/backend/node_modules/.bin/jest",
+            "args": [
+                "${fileBasenameNoExtension}",
+                "--config",
+                "${workspaceFolder}/backend/jest.config.js"
+            ],
+            "console": "integratedTerminal",
+            "disableOptimisticBPs": true,
+            "windows": {
+                "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+            }
         }
     ]
 }

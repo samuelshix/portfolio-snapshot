@@ -33,12 +33,12 @@ export class TokenService {
             return {
                 ...existingToken,
                 prices: existingToken.tokenPrice
-                    .filter(p => p.timestamp && p.price != null)
-                    .map(p => ({
+                    .filter((p: { timestamp: Date; price: number }) => p.timestamp && p.price != null)
+                    .map((p: { timestamp: Date; price: number }) => ({
                         date: p.timestamp.toISOString(),
                         price: Number(p.price)
                     }))
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .sort((a: { date: string }, b: { date: string }) => new Date(b.date).getTime() - new Date(a.date).getTime())
             };
         }
 

@@ -27,7 +27,7 @@ export class BirdeyeClient {
     private static instance: BirdeyeClient;
     private readonly axiosInstance;
 
-    private constructor() {
+    public constructor() {
         this.axiosInstance = axios.create({
             baseURL: BIRDEYE_URL,
             headers: {

@@ -13,8 +13,8 @@ export class TokenAccountService {
 
     async getUserTokenBalances(walletAddress: string): Promise<TokenAccount[]> {
         try {
-            const { tokens } = await this.heliusClient.getTokenBalances(walletAddress);
-
+            const { tokens, } = await this.heliusClient.getTokenBalances(walletAddress);
+            console.log(tokens)
             return tokens.map(balance => ({
                 userAddress: walletAddress,
                 tokenMint: balance.mint,

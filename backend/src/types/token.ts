@@ -4,5 +4,5 @@ export interface Token {
     symbol: string;
     decimals: number;
     logoURI: string;
-    prices: { date: string, price: number }[]
+    prices?: { date: string, price: number }[]
 }

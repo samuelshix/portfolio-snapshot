@@ -42,7 +42,7 @@ describe('TokenService', () => {
 
             (mockPrisma.token.findUnique as jest.Mock).mockResolvedValueOnce(mockToken);
 
-            const result = await tokenService.getToken('test-mint');
+            const result = await tokenService.getTokens(['test-mint']);
 
             expect(result).toEqual({
                 ...mockToken,
@@ -63,12 +63,12 @@ describe('TokenService', () => {
             (axios.get as jest.Mock).mockResolvedValueOnce({ data: [mockJupiterToken] });
             (mockPrisma.token.create as jest.Mock).mockResolvedValueOnce(mockJupiterToken);
 
-            const result = await tokenService.getToken('new-mint');
+            const result = await tokenService.getTokens(['new-mint']);
 
-            expect(result).toEqual({
+            expect(result).toEqual([{
                 ...mockJupiterToken,
                 prices: []
-            });
+            }]);
         });
     });
 }); 

@@ -13,44 +13,66 @@ export class TokenService {
         this.birdeyeClient = birdeyeClient;
     }
 
-    async getJupiterTokenData(mint: string): Promise<Token | null> {
+    async getJupiterTokenData(mints: string[]): Promise<Token[]> {
         try {
-            const { data: allTokens } = await axios.get<Token[]>(this.JUPITER_API_URL);
-            return allTokens.find(token => token.mint === mint) || null;
+            const { data: allTokens } = await axios.get<any[]>(this.JUPITER_API_URL);
+            const matchedTokens: Token[] = allTokens
+                .filter(token => mints.includes(token.address))
+                .map(token => ({
+                    ...token,
+                    mint: token.address,
+                    address: undefined // remove field since Jupiter API returns address as mint
+                }));
+
+            console.log("matched tokens:", matchedTokens)
+
+            return matchedTokens;
         } catch (error) {
             console.error('Error fetching Jupiter token data:', error);
-            return null;
+            return [];
         }
     }
 
-    async getToken(mint: string): Promise<Token | null> {
-        const existingToken = await this.prisma.token.findUnique({
-            where: { mint },
+    async getTokens(mints: string[]): Promise<Token[]> {
+        // First get all existing tokens from database
+        const existingTokens = await this.prisma.token.findMany({
+            where: { mint: { in: mints } },
             include: { tokenPrice: true }
         });
 
-        if (existingToken) {
-            return {
-                ...existingToken,
-                prices: existingToken.tokenPrice
-                    .filter((p: { timestamp: Date; price: number }) => p.timestamp && p.price != null)
-                    .map((p: { timestamp: Date; price: number }) => ({
-                        date: p.timestamp.toISOString(),
-                        price: Number(p.price)
-                    }))
-                    .sort((a: { date: string }, b: { date: string }) => new Date(b.date).getTime() - new Date(a.date).getTime())
-            };
+        // // Transform existing tokens to include prices
+        // const formattedExistingTokens = existingTokens.map(token => ({
+        //     ...token,
+        //     prices: token.tokenPrice
+        //         .filter((p: { timestamp: Date; price: number }) => p.timestamp && p.price != null)
+        //         .map((p: { timestamp: Date; price: number }) => ({
+        //             date: p.timestamp.toISOString(),
+        //             price: Number(p.price)
+        //         }))
+        //         .sort((a: { date: string }, b: { date: string }) =>
+        //             new Date(b.date).getTime() - new Date(a.date).getTime())
+        // }));
+
+        const existingMints = existingTokens.map(t => t.mint);
+        const missingMints = mints.filter(mint => !existingMints.includes(mint));
+
+        if (missingMints.length === 0) {
+            return existingTokens;
         }
 
-        const jupiterToken = await this.getJupiterTokenData(mint);
-        if (!jupiterToken) {
-            return null;
-        }
+        // Fetch missing tokens from Jupiter
+        const jupiterTokens = await this.getJupiterTokenData(missingMints);
+        // console.log("mints", mints)
+        // console.log("missingMints", missingMints)
+        // console.log("existingTokens", existingMints)
+        const savedTokensPromises = jupiterTokens.map(token => this.saveToken(token));
+        const savedTokens = await Promise.all(savedTokensPromises);
 
-        return this.saveToken(jupiterToken);
+        return [...existingTokens, ...savedTokens];
     }
 
     async saveToken(token: Token): Promise<Token> {
+        console.log("Saving token", token)
         const savedToken = await this.prisma.token.create({
             data: {
                 mint: token.mint,

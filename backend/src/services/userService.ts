@@ -29,23 +29,23 @@ export class UserService {
 
             const { tokens: heliusTokens } = await heliusClient.getTokenBalances(address);
 
-            const validTokens = heliusTokens.filter(token =>
+            const validTokenAccounts = heliusTokens.filter(token =>
                 token.amount > 0 &&
                 typeof token.decimals === 'number' &&
                 token.decimals >= 0 &&
                 token.decimals <= 32
             );
-
+            const enrichedTokens = await this.tokenService.getTokens(validTokenAccounts.map(token => token.mint));
             const tokenAccounts = await Promise.all(
-                validTokens.map(async (heliusToken) => {
+                validTokenAccounts.map(async (heliusToken) => {
                     let retries = 3;
                     while (retries > 0) {
                         const canProceed = await this.rateLimiter.consume(address);
                         if (canProceed) {
                             try {
-                                const token = await this.tokenService.getToken(heliusToken.mint);
+                                const token = enrichedTokens.find(token => token.mint === heliusToken.mint);
                                 if (!token) {
-                                    throw new Error(`Token ${heliusToken.mint} not found`);
+                                    continue;
                                 }
 
                                 const balance = heliusToken.amount / Math.pow(10, heliusToken.decimals);
@@ -95,12 +95,12 @@ export class UserService {
                 })
             );
 
-            const validTokenAccounts = tokenAccounts.filter((account): account is NonNullable<typeof account> =>
+            const finalTokenAccounts = tokenAccounts.filter((account): account is NonNullable<typeof account> =>
                 account !== null
             );
 
-            await this.cache.set(cacheKey, validTokenAccounts, 60);
-            return validTokenAccounts;
+            await this.cache.set(cacheKey, finalTokenAccounts, 60);
+            return finalTokenAccounts;
         } catch (error) {
             console.error('Error syncing user tokens:', error);
             throw error;

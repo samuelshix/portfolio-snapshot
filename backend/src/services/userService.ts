@@ -98,7 +98,7 @@ export class UserService {
             const finalTokenAccounts = tokenAccounts.filter((account): account is NonNullable<typeof account> =>
                 account !== null
             );
-
+            console.log("finalTokenAccounts", finalTokenAccounts)
             await this.cache.set(cacheKey, finalTokenAccounts, 60);
             return finalTokenAccounts;
         } catch (error) {

@@ -1,6 +1,6 @@
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { useWallet } from '@solana/wallet-adapter-react';
 import { observer } from 'mobx-react-lite';
-import React, { useEffect, useState, FC } from 'react';
+import { useEffect, useState, FC } from 'react';
 import TopBar from './TopBar';
 import Sidebar from './Sidebar';
 import PriceChart from './PriceChart';
@@ -42,7 +42,7 @@ const Portfolio: FC = observer(() => {
             }));
         }
         if (tokenStore.tokenAccounts.length > 0) calculatePortfolioValue();
-    }, [tokenStore.tokenAccounts]);
+    }, []);
 
 
     return (

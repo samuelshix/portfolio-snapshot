@@ -1,5 +1,4 @@
 import { makeAutoObservable } from 'mobx';
-import { Token } from "../types/token";
 import { TokenAccount } from "../types/tokenAccount";
 import { api } from "./api";
 

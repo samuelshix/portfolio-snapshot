@@ -1,5 +1,4 @@
 import React from 'react';
-import StocksList from './StocksList';
 import { TokenAccount } from '../types/tokenAccount';
 
 

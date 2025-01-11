@@ -24,8 +24,6 @@ export class TokenService {
                     address: undefined // remove field since Jupiter API returns address as mint
                 }));
 
-            console.log("matched tokens:", matchedTokens)
-
             return matchedTokens;
         } catch (error) {
             console.error('Error fetching Jupiter token data:', error);
@@ -62,8 +60,8 @@ export class TokenService {
 
         // Fetch missing tokens from Jupiter
         const jupiterTokens = await this.getJupiterTokenData(missingMints);
-        // console.log("mints", mints)
-        // console.log("missingMints", missingMints)
+        console.log("user's mints", mints)
+        console.log("mints to save", jupiterTokens)
         // console.log("existingTokens", existingMints)
         const savedTokensPromises = jupiterTokens.map(token => this.saveToken(token));
         const savedTokens = await Promise.all(savedTokensPromises);

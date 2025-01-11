@@ -34,32 +34,28 @@ export const api = {
         create: (address: string) =>
             axiosInstance.post<User>(`/api/users`, { address }),
     },
-    tokens: {
-        get: (mint: string) =>
-            axiosInstance.get<Token>(`/api/tokens/token`, { params: { mint } }),
-        save: (token: Token) =>
-            axiosInstance.post<Token>(`/api/tokens/setToken`, token),
-    },
-    tokenAccounts: {
-        getBalances: (publicKey: string) =>
-            axiosInstance.get(`/api/token-accounts/getBalances`, { params: { publicKey } }),
-        save: (tokenAccount: TokenAccount, publicKey: string) =>
-            axiosInstance.post(`/api/token-accounts/createTokenAccount`, {
-                userAddress: publicKey,
-                tokenMint: tokenAccount.token.mint,
-                balance: tokenAccount.tokenAmount,
-            })
-    }
+    // tokens: {
+    //     get: (mint: string) =>
+    //         axiosInstance.get<Token>(`/api/tokens/token`, { params: { mint } }),
+    //     save: (token: Token) =>
+    //         axiosInstance.post<Token>(`/api/tokens/setToken`, token),
+    // },
+    // tokenAccounts: {
+    //     getBalances: (publicKey: string) =>
+    //         axiosInstance.get(`/api/token-accounts/getBalances`, { params: { publicKey } }),
+    //     save: (tokenAccount: TokenAccount, publicKey: string) =>
+    //         axiosInstance.post(`/api/token-accounts/createTokenAccount`, {
+    //             userAddress: publicKey,
+    //             tokenMint: tokenAccount.token.mint,
+    //             balance: tokenAccount.tokenAmount,
+    //         })
+    // }
 };
 
-// In your React component or MobX store
 export async function loadUserData(userAddress: string) {
     try {
         const { data } = await api.users.getWithTokenData(userAddress);
-        // data will contain:
-        // - User information
-        // - All token accounts with balances
-        // - Token information including prices
+
         return data;
     } catch (error) {
         console.error('Error loading user data:', error);

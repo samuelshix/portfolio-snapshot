@@ -1,11 +1,12 @@
 import { Request, Response, RequestHandler } from 'express';
-import { UserService, userService } from '../services/userService';
+import { UserService } from '../services/userService';
 
 export class UserController {
     private userService: UserService;
 
     constructor() {
-        this.userService = userService;
+        const useMockData = process.env.NODE_ENV === 'development' && process.env.USE_MOCK_DATA === 'true';
+        this.userService = new UserService(useMockData);
     }
 
     getUser: RequestHandler = async (req, res) => {

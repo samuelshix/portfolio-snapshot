@@ -22,6 +22,7 @@
   },
   "include": [
     "src",
-    "scripts"
+    "scripts",
+    "../backend/src/mockData"
   ]
 }

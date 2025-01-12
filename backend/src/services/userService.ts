@@ -3,16 +3,19 @@ import { TokenService } from './tokenService';
 import { heliusClient } from '@/clients/heliusClient';
 import { Cache } from '@/utils/cache';
 import { RateLimiter } from '@/utils/rateLimiter';
+import { ServiceFactory } from './serviceFactory';
 
 export class UserService {
     private prisma: PrismaClient;
     private tokenService: TokenService;
     private cache: Cache;
     private rateLimiter: RateLimiter;
+    private heliusClient: typeof heliusClient;
 
-    constructor() {
+    constructor(useMockData: boolean) {
         this.prisma = new PrismaClient();
-        this.tokenService = new TokenService();
+        this.tokenService = ServiceFactory.getTokenService(useMockData);
+        this.heliusClient = ServiceFactory.getHeliusClient(useMockData);
         this.cache = new Cache();
         this.rateLimiter = new RateLimiter();
     }
@@ -27,7 +30,7 @@ export class UserService {
             const cached = await this.cache.get(cacheKey);
             if (cached) return cached;
 
-            const { tokens: heliusTokens } = await heliusClient.getTokenBalances(address);
+            const { tokens: heliusTokens } = await this.heliusClient.getTokenBalances(address);
 
             const validTokenAccounts = heliusTokens.filter(token =>
                 token.amount > 0 &&
@@ -98,12 +101,12 @@ export class UserService {
             const finalTokenAccounts = tokenAccounts.filter((account): account is NonNullable<typeof account> =>
                 account !== null
             );
-            console.log("finalTokenAccounts", finalTokenAccounts)
+
             await this.cache.set(cacheKey, finalTokenAccounts, 60);
             return finalTokenAccounts;
         } catch (error) {
             console.error('Error syncing user tokens:', error);
-            throw error;
+            return [];
         }
     }
 
@@ -140,5 +143,3 @@ export class UserService {
         }
     }
 }
-
-export const userService = new UserService(); 

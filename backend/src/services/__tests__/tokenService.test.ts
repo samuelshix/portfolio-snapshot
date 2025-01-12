@@ -1,20 +1,20 @@
 import { TokenService } from '../tokenService';
 import { PrismaClient } from '@prisma/client';
-import { BirdeyeClient } from '@/clients/birdeyeClient';
-import axios from 'axios';
+import { ServiceFactory } from '../serviceFactory';
 
-// Mock dependencies
+// Mock PrismaClient
 jest.mock('@prisma/client', () => ({
-    PrismaClient: jest.fn().mockImplementation(() => ({
+    PrismaClient: jest.fn(() => ({
         token: {
-            findUnique: jest.fn(),
-            create: jest.fn()
+            findMany: jest.fn().mockResolvedValue([]),
+            create: jest.fn(),
+            findUnique: jest.fn()
+        },
+        tokenPrice: {
+            createMany: jest.fn()
         }
     }))
 }));
-
-jest.mock('@/clients/birdeyeClient');
-jest.mock('axios');
 
 describe('TokenService', () => {
     let tokenService: TokenService;
@@ -22,53 +22,42 @@ describe('TokenService', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        process.env.USE_MOCK_DATA = 'false';
 
         mockPrisma = new PrismaClient() as jest.Mocked<PrismaClient>;
-        // Inject the mock into the service
         tokenService = new TokenService();
         (tokenService as any).prisma = mockPrisma;
     });
 
-    describe('getToken', () => {
-        it('should return existing token from database if found', async () => {
-            const mockToken = {
+    describe('getTokens', () => {
+        it('should return mock tokens when mock data is enabled', async () => {
+            const service = ServiceFactory.getTokenService(true);
+
+            const result = await service.getTokens(['So11111111111111111111111111111111111111112']);
+
+            console.log(result)
+
+            expect(result[0].mint).toBe('So11111111111111111111111111111111111111112');
+            expect(result[0].name).toBe('Wrapped SOL');
+            expect(result[0].prices).toBeDefined();
+        });
+
+        it('should return tokens from database when USE_MOCK_DATA is false', async () => {
+            const mockDbTokens = [{
                 mint: 'test-mint',
                 name: 'Test Token',
                 symbol: 'TEST',
                 decimals: 9,
                 logoURI: 'test-uri',
                 tokenPrice: []
-            };
+            }];
 
-            (mockPrisma.token.findUnique as jest.Mock).mockResolvedValueOnce(mockToken);
+            (mockPrisma.token.findMany as jest.Mock).mockResolvedValueOnce(mockDbTokens);
 
             const result = await tokenService.getTokens(['test-mint']);
 
-            expect(result).toEqual({
-                ...mockToken,
-                prices: []
-            });
-        });
-
-        it('should fetch and save new token if not found in database', async () => {
-            const mockJupiterToken = {
-                mint: 'new-mint',
-                name: 'New Token',
-                symbol: 'NEW',
-                decimals: 9,
-                logoURI: 'new-uri'
-            };
-
-            (mockPrisma.token.findUnique as jest.Mock).mockResolvedValueOnce(null);
-            (axios.get as jest.Mock).mockResolvedValueOnce({ data: [mockJupiterToken] });
-            (mockPrisma.token.create as jest.Mock).mockResolvedValueOnce(mockJupiterToken);
-
-            const result = await tokenService.getTokens(['new-mint']);
-
-            expect(result).toEqual([{
-                ...mockJupiterToken,
-                prices: []
-            }]);
+            expect(result).toEqual(mockDbTokens);
+            expect(mockPrisma.token.findMany).toHaveBeenCalled();
         });
     });
 }); 

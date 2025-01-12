@@ -12,6 +12,10 @@ jest.mock('@prisma/client', () => ({
             findUnique: jest.fn(),
             create: jest.fn()
         },
+        token: {
+            findMany: jest.fn(),
+            create: jest.fn()
+        },
         tokenAccount: {
             upsert: jest.fn(() => Promise.resolve({
                 id: 1,
@@ -68,7 +72,7 @@ describe('UserService', () => {
         mockCache = new Cache() as jest.Mocked<Cache>;
         mockRateLimiter = new RateLimiter() as jest.Mocked<RateLimiter>;
 
-        userService = new UserService();
+        userService = new UserService(true);
         (userService as any).prisma = mockPrisma;
         (userService as any).tokenService = mockTokenService;
         (userService as any).cache = mockCache;

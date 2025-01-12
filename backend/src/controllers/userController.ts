@@ -5,7 +5,7 @@ export class UserController {
     private userService: UserService;
 
     constructor() {
-        const useMockData = process.env.NODE_ENV === 'development' && process.env.USE_MOCK_DATA === 'true';
+        const useMockData = process.env.USE_MOCK_DATA === 'true';
         this.userService = new UserService(useMockData);
     }
 

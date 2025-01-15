@@ -13,7 +13,7 @@ export class ServiceFactory {
 
     static getHeliusClient(useMockData: boolean) {
         if (useMockData) {
-            return mockHeliusClient as typeof heliusClient;
+            return mockHeliusClient;
         }
         return heliusClient;
     }

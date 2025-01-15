@@ -1,5 +1,3 @@
-import { Token } from "./token";
-
 export interface TokenAccount {
     id?: number;
     userAddress: string;

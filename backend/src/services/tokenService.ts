@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-import { Token } from '@/types/token';
+import { PrismaClient, Token } from '@prisma/client';
 import { BirdeyeClient, birdeyeClient } from '@/clients/birdeyeClient';
 import axios from 'axios';
 
@@ -51,7 +50,7 @@ export class TokenService {
         //             new Date(b.date).getTime() - new Date(a.date).getTime())
         // }));
 
-        const existingMints = existingTokens.map(t => t.mint);
+        const existingMints = existingTokens.map(t as Token => t.mint);
         const missingMints = mints.filter(mint => !existingMints.includes(mint));
 
         if (missingMints.length === 0) {

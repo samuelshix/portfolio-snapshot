@@ -4,7 +4,6 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 
 import userRoutes from './routes/userRoutes';
-import tokenAccountRoutes from './routes/tokenAccountRoutes';
 
 dotenv.config();
 

@@ -24,14 +24,6 @@ export class MockTokenService extends TokenService {
 
     async getTokens(mints: string[]): Promise<Token[]> {
         const tokens = await this.getJupiterTokenData(mints);
-        return tokens.map(token => ({
-            ...token,
-            prices: [
-                {
-                    date: new Date().toISOString(),
-                    price: 100.00
-                }
-            ]
-        }));
+        return tokens
     }
 } 

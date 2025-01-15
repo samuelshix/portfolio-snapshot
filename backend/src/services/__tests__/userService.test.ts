@@ -120,7 +120,6 @@ describe('UserService', () => {
                 symbol: 'TK1',
                 decimals: 6,
                 logoURI: 'token-1/URI.png',
-                prices: []
             }]);
 
             (mockPrisma.tokenAccount.upsert as jest.Mock).mockResolvedValue(mockTokenAccount);

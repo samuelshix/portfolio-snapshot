@@ -39,7 +39,6 @@ describe('TokenService', () => {
 
             expect(result[0].mint).toBe('So11111111111111111111111111111111111111112');
             expect(result[0].name).toBe('Wrapped SOL');
-            expect(result[0].prices).toBeDefined();
         });
 
         it('should return tokens from database when USE_MOCK_DATA is false', async () => {

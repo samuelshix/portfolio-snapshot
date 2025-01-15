@@ -50,7 +50,7 @@ export class TokenService {
         //             new Date(b.date).getTime() - new Date(a.date).getTime())
         // }));
 
-        const existingMints = existingTokens.map(t as Token => t.mint);
+        const existingMints = existingTokens.map((t: Token) => t.mint);
         const missingMints = mints.filter(mint => !existingMints.includes(mint));
 
         if (missingMints.length === 0) {
@@ -83,13 +83,13 @@ export class TokenService {
         const currentPrice = await this.getCurrentPrice(token.mint);
         if (currentPrice) {
             const tokenWithPrices = await this.getHistoricalTokenPrices(savedToken as Token, 30);
-            return tokenWithPrices || { ...savedToken, prices: [] };
+            return tokenWithPrices || { ...savedToken, prices: [] } as Token;
         }
 
         return {
             ...savedToken,
             prices: []
-        };
+        } as Token;
     }
 
     async getHistoricalTokenPrices(token: Token, days: number): Promise<Token | null> {
@@ -108,7 +108,7 @@ export class TokenService {
             return {
                 ...token,
                 prices
-            };
+            } as Token;
         } catch (error) {
             console.error('Error fetching historical prices:', error);
             return null;

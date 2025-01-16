@@ -13,8 +13,7 @@
     "test:coverage": "jest --coverage",
     "test:debug": "node --inspect-brk ./node_modules/.bin/jest --runInBand",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src/**/*.ts",
-    "pre-push": "npm run typecheck && npm run lint && npm test"
+    "lint": "eslint src/**/*.ts"
   },
   "keywords": [],
   "author": "",

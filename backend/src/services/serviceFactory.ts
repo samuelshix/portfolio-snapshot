@@ -1,20 +1,20 @@
 import { TokenService } from './tokenService';
-import { MockTokenService } from './mock/mockTokenService';
 import { heliusClient } from '@/clients/heliusClient';
 import { mockHeliusClient } from '@/clients/mock/mockHeliusClient';
+import { birdeyeClient } from '@/clients/birdeyeClient';
+import { mockBirdeyeClient } from '@/clients/mock/mockBirdeyeClient';
+import { jupiterClient } from '@/clients/jupiterClient';
+import { mockJupiterClient } from '@/clients/mock/mockJupiterClient';
 
 export class ServiceFactory {
     static getTokenService(useMockData: boolean) {
-        if (useMockData) {
-            return new MockTokenService();
-        }
-        return new TokenService();
+        return new TokenService(
+            useMockData ? mockJupiterClient : jupiterClient,
+            useMockData ? mockBirdeyeClient : birdeyeClient
+        );
     }
 
     static getHeliusClient(useMockData: boolean) {
-        if (useMockData) {
-            return mockHeliusClient;
-        }
-        return heliusClient;
+        return useMockData ? mockHeliusClient : heliusClient;
     }
 } 

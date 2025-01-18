@@ -1,71 +1,58 @@
-import { PrismaClient, Token } from '@prisma/client';
+import { PrismaClient, Token, TokenPrice } from '@prisma/client';
 import { BirdeyeClient, birdeyeClient } from '@/clients/birdeyeClient';
 import axios from 'axios';
+import { JupiterClient, jupiterClient } from '@/clients/jupiterClient';
 
 export class TokenService {
     private prisma: PrismaClient;
+    private jupiterClient: JupiterClient;
     private birdeyeClient: BirdeyeClient;
-    private readonly JUPITER_API_URL = 'https://token.jup.ag/all';
 
-    constructor() {
+    constructor(
+        jupiterAPI: JupiterClient = jupiterClient,
+        birdeyeApi: BirdeyeClient = birdeyeClient
+    ) {
         this.prisma = new PrismaClient();
-        this.birdeyeClient = birdeyeClient;
+        this.jupiterClient = jupiterAPI;
+        this.birdeyeClient = birdeyeApi;
     }
 
     async getJupiterTokenData(mints: string[]): Promise<Token[]> {
-        try {
-            const { data: allTokens } = await axios.get<any[]>(this.JUPITER_API_URL);
-            const matchedTokens: Token[] = allTokens
-                .filter(token => mints.includes(token.address))
-                .map(token => ({
-                    ...token,
-                    mint: token.address,
-                    address: undefined // remove field since Jupiter API returns address as mint
-                }));
-
-            return matchedTokens;
-        } catch (error) {
-            console.error('Error fetching Jupiter token data:', error);
-            return [];
-        }
+        const allTokens = await this.jupiterClient.getAllTokens();
+        return allTokens.filter(token => mints.includes(token.mint));
     }
 
     async getTokens(mints: string[]): Promise<Token[]> {
-        // First get all existing tokens from database
+        // Get existing tokens with prices
         const existingTokens = await this.prisma.token.findMany({
             where: { mint: { in: mints } },
             include: { tokenPrice: true }
         });
 
-        // // Transform existing tokens to include prices
-        // const formattedExistingTokens = existingTokens.map(token => ({
-        //     ...token,
-        //     prices: token.tokenPrice
-        //         .filter((p: { timestamp: Date; price: number }) => p.timestamp && p.price != null)
-        //         .map((p: { timestamp: Date; price: number }) => ({
-        //             date: p.timestamp.toISOString(),
-        //             price: Number(p.price)
-        //         }))
-        //         .sort((a: { date: string }, b: { date: string }) =>
-        //             new Date(b.date).getTime() - new Date(a.date).getTime())
-        // }));
-
+        // Find missing tokens
         const existingMints = existingTokens.map((t: Token) => t.mint);
         const missingMints = mints.filter(mint => !existingMints.includes(mint));
 
-        if (missingMints.length === 0) {
-            return existingTokens;
-        }
+        // Get and save missing tokens
+        const newTokens = missingMints.length > 0
+            ? await Promise.all(
+                (await this.getJupiterTokenData(missingMints))
+                    .map(token => this.saveToken(token))
+            )
+            : [];
 
-        // Fetch missing tokens from Jupiter
-        const jupiterTokens = await this.getJupiterTokenData(missingMints);
-        console.log("user's mints", mints)
-        console.log("mints to save", jupiterTokens)
-        // console.log("existingTokens", existingMints)
-        const savedTokensPromises = jupiterTokens.map(token => this.saveToken(token));
-        const savedTokens = await Promise.all(savedTokensPromises);
+        // Update prices for all tokens
+        await Promise.all(
+            [...existingTokens, ...newTokens].map(token =>
+                this.getHistoricalTokenPrices(token, 30)
+            )
+        );
 
-        return [...existingTokens, ...savedTokens];
+        // Read updated tokens with new prices
+        return this.prisma.token.findMany({
+            where: { mint: { in: mints } },
+            include: { tokenPrice: true }
+        });
     }
 
     async saveToken(token: Token): Promise<Token> {
@@ -80,19 +67,10 @@ export class TokenService {
             }
         });
 
-        const currentPrice = await this.getCurrentPrice(token.mint);
-        if (currentPrice) {
-            const tokenWithPrices = await this.getHistoricalTokenPrices(savedToken as Token, 30);
-            return tokenWithPrices || { ...savedToken, prices: [] } as Token;
-        }
-
-        return {
-            ...savedToken,
-            prices: []
-        } as Token;
+        return savedToken;
     }
 
-    async getHistoricalTokenPrices(token: Token, days: number): Promise<Token | null> {
+    async getHistoricalTokenPrices(token: Token, days: number): Promise<TokenPrice[]> {
         try {
             const todayUnixTime = Math.floor(Date.now() / 1000);
             const fromTime = todayUnixTime - days * 24 * 60 * 60;
@@ -102,16 +80,15 @@ export class TokenService {
                 fromTime,
                 todayUnixTime
             );
-
             await this.savePrices(token.mint, prices);
 
-            return {
-                ...token,
-                prices
-            } as Token;
+            return this.prisma.tokenPrice.findMany({
+                where: { tokenMint: token.mint }
+            });
+
         } catch (error) {
             console.error('Error fetching historical prices:', error);
-            return null;
+            return [];
         }
     }
 
@@ -137,14 +114,13 @@ export class TokenService {
         }
     }
 
-    async getCurrentPrice(mint: string): Promise<number | null> {
-        try {
-            return await this.birdeyeClient.getCurrentPrice(mint);
-        } catch (error) {
-            console.error('Error fetching current price:', error);
-            return null;
-        }
-    }
+    // async getCurrentPrice(mint: string): Promise<void> {
+    //     try {
+    //         await this.birdeyeClient.getCurrentPrice(mint);
+    //     } catch (error) {
+    //         console.error('Error fetching current price:', error);    
+    //     }
+    // }
 }
 
 export const tokenService = new TokenService();

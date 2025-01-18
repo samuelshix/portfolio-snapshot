@@ -7,7 +7,7 @@ export class JupiterClient {
     private static instance: JupiterClient;
     private readonly axiosInstance;
 
-    private constructor() {
+    constructor() {
         this.axiosInstance = axios.create({
             baseURL: JUPITER_API_URL
         });

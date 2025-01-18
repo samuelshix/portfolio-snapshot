@@ -23,6 +23,7 @@ export class UserService {
     async syncUserTokens(address: string): Promise<TokenAccount[]> {
         // Check cache first
         const cachedTokens = await this.cache.get<TokenAccount[]>(`user_tokens_${address}`);
+        // TODO: uncomment this when we have caching
         if (cachedTokens) {
             return cachedTokens;
         }
@@ -34,14 +35,14 @@ export class UserService {
             );
 
             // Get token metadata for all tokens at once
-            const enrichedTokens = await this.tokenService.getTokens(
+            const tokenWithPrices = await this.tokenService.getTokens(
                 validTokenAccounts.map(token => token.mint)
             );
 
             // Process each token account with retries
             const tokenAccounts = await Promise.all(
                 validTokenAccounts
-                    .filter(heliusToken => enrichedTokens.some(token => token.mint === heliusToken.mint))
+                    .filter(heliusToken => tokenWithPrices.some(token => token.mint === heliusToken.mint))
                     .map(async (heliusToken) => {
                         const balance = heliusToken.amount / Math.pow(10, heliusToken.decimals);
                         return this.prisma.tokenAccount.upsert({

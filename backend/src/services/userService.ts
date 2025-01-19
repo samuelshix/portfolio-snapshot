@@ -24,9 +24,9 @@ export class UserService {
         // Check cache first
         const cachedTokens = await this.cache.get<TokenAccount[]>(`user_tokens_${address}`);
         // TODO: uncomment this when we have caching
-        if (cachedTokens) {
-            return cachedTokens;
-        }
+        // if (cachedTokens) {
+        //     return cachedTokens;
+        // }
 
         try {
             const { tokens: heliusTokens } = await this.heliusClient.getTokenBalances(address);
@@ -59,6 +59,13 @@ export class UserService {
                             },
                             update: {
                                 balance
+                            },
+                            include: {
+                                token: {
+                                    include: {
+                                        tokenPrice: true
+                                    }
+                                }
                             }
                         });
                     })

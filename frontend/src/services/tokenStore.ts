@@ -12,6 +12,7 @@ class TokenAccountStore {
     async loadUserTokens(address: string) {
         try {
             const { data } = await api.users.getWithTokenData(address);
+            console.log(data)
             this.tokenAccounts = data.tokenAccounts;
             return this.tokenAccounts;
         } catch (error) {

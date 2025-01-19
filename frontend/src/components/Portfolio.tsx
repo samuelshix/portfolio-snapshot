@@ -29,7 +29,9 @@ const Portfolio: FC = observer(() => {
 
     useEffect(() => {
         const calculatePortfolioValue = async () => {
+            console.log(tokenStore.tokenAccounts)
             const valueByDay = getPortfolioValueByDay(tokenStore.tokenAccounts);
+            console.log(valueByDay)
             setPortfolioValueByDay(valueByDay);
 
             const totalValue = valueByDay.reduce((total, dayValue) => {
@@ -55,7 +57,8 @@ const Portfolio: FC = observer(() => {
                 <div className="text-3xl font-bold mt-2">{totalPortfolioValue}</div>
                 {
                     portfolioValueByDay.length > 1 &&
-                    <div className="text-green-500 mt-1">{portfolioValueByDay[1].value - portfolioValueByDay[0].value / portfolioValueByDay[0].value} %</div>
+                    <div className="text-green-500 mt-1">    {((portfolioValueByDay[0].value - portfolioValueByDay[0].value) / portfolioValueByDay[1].value * 100).toFixed(2)}
+                        %</div>
                 }
                 {/* Chart */}
                 <div className="mt-6">
@@ -67,11 +70,11 @@ const Portfolio: FC = observer(() => {
                 {/* Buying Power */}
                 <div className="mt-4">
                     <div className="text-sm text-gray-400">Buying Power</div>
-                    <div className="font-semibold">$1,250.92</div>
+                    <div className="font-semibold">0</div>
                 </div>
 
                 {/* Cash */}
-                <div className="mt-6">
+                {/* <div className="mt-6">
                     <h2 className="text-lg font-semibold">Lending</h2>
                     <div className="flex justify-between items-center bg-gray-800 p-4 rounded-md mt-2">
                         <div>
@@ -84,7 +87,7 @@ const Portfolio: FC = observer(() => {
                             <div className="text-lg font-semibold">$0.00</div>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
             <Sidebar tokenAccounts={tokenStore.tokenAccounts} />
         </>

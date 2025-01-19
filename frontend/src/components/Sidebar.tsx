@@ -13,7 +13,7 @@ const Sidebar: React.FC<SidebarProps> = ({ tokenAccounts }) => {
                 <div className="mt-1 space-y-1">
                     {tokenAccounts.map(account => {
                         // Add null check for token and prices
-                        if (!account.token || !account.token.prices || account.token.prices.length === 0) {
+                        if (!account.token || !account.token.tokenPrice || account.token.tokenPrice.length === 0) {
                             return (
                                 <div key={account.token?.mint || 'unknown'} className="flex justify-between items-center border-b border-gray-700 py-3 text-[10px] last:border-none">
                                     <div>
@@ -32,12 +32,12 @@ const Sidebar: React.FC<SidebarProps> = ({ tokenAccounts }) => {
                                 <div>
                                     <p className="font-bold">{account.token.symbol}</p>
                                     <p className="font-light">
-                                        {(account.tokenAmount / Math.pow(10, account.token.decimals) * account.token.prices[0].price)
+                                        {(account.tokenAmount * account.token.tokenPrice[0].price)
                                             .toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                                     </p>
                                 </div>
                                 <div className="text-right font-light">
-                                    {account.token.prices[0].price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                                    {account.token.tokenPrice[0].price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                                     <p>~%</p>
                                 </div>
                             </div>

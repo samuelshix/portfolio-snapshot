@@ -11,10 +11,12 @@ interface PriceChartProps {
 
 const PriceChart: React.FC<PriceChartProps> = ({ portfolioValueByDay }) => {
 
-    const portfolioValueList = portfolioValueByDay.map(entry => ({
-        date: entry.date,
-        totalValue: entry.value,
-    }));
+    const portfolioValueList = portfolioValueByDay
+        .map(entry => ({
+            date: entry.date,
+            totalValue: entry.value,
+        }))
+        .reverse();
 
     const chartData = {
         labels: portfolioValueList.map(entry => entry.date),

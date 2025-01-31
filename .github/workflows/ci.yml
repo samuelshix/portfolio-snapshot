@@ -95,6 +95,6 @@ jobs:
           cd backend
           npm install
           npx prisma generate
-          railway up
+          railway up --service token-retrieval-service
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

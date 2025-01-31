@@ -9,7 +9,6 @@ export class UserService {
     private prisma: PrismaClient;
     private tokenService: TokenService;
     private cache: Cache;
-    private rateLimiter: RateLimiter;
     private heliusClient;
 
     constructor(useMockData: boolean) {
@@ -17,12 +16,11 @@ export class UserService {
         this.tokenService = ServiceFactory.getTokenService(useMockData);
         this.heliusClient = ServiceFactory.getHeliusClient(useMockData);
         this.cache = new Cache();
-        this.rateLimiter = new RateLimiter();
     }
 
     async syncUserTokens(address: string): Promise<TokenAccount[]> {
         // Check cache first
-        const cachedTokens = await this.cache.get<TokenAccount[]>(`user_tokens_${address}`);
+        // const cachedTokens = await this.cache.get<TokenAccount[]>(`user_tokens_${address}`);
         // TODO: uncomment this when we have caching
         // if (cachedTokens) {
         //     return cachedTokens;

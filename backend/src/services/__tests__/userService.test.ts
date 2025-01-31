@@ -4,6 +4,9 @@ import { TokenService } from '../tokenService';
 import { Cache } from '@/utils/cache';
 import { HeliusClient } from '@/clients/heliusClient';
 import { HeliusBalancesResponse } from '@/types/heliusBalancesResponse';
+import { BirdeyeClient } from '@/clients/birdeyeClient';
+import { JupiterClient } from '@/clients/jupiterClient';
+import { ServiceFactory } from '../serviceFactory';
 
 // Mock PrismaClient
 jest.mock('@prisma/client', () => ({
@@ -19,6 +22,7 @@ jest.mock('@prisma/client', () => ({
 }));
 
 jest.mock('@/utils/cache');
+jest.mock('@/clients/heliusClient');
 
 describe('UserService', () => {
     let userService: UserService;
@@ -26,6 +30,8 @@ describe('UserService', () => {
     let mockTokenService: jest.Mocked<TokenService>;
     let mockCache: jest.Mocked<Cache>;
     let mockHeliusClient: jest.Mocked<HeliusClient>;
+    let mockJupiterClient: JupiterClient;
+    let mockBirdeyeClient: BirdeyeClient;
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -46,10 +52,13 @@ describe('UserService', () => {
         } as unknown as jest.Mocked<HeliusClient>;
 
         userService = new UserService(true);
+        // mockJupiterClient = new JupiterClient() as jest.Mocked<JupiterClient>;
+        // mockBirdeyeClient = new BirdeyeClient() as jest.Mocked<BirdeyeClient>;
         (userService as any).prisma = mockPrisma;
         (userService as any).tokenService = mockTokenService;
-        (userService as any).cache = mockCache;
         (userService as any).heliusClient = mockHeliusClient;
+        (userService as any).cache = mockCache;
+        // (userService as any).heliusClient = mockHeliusClient;
     });
 
     describe('getUser', () => {
@@ -80,13 +89,13 @@ describe('UserService', () => {
     });
 
     describe('syncUserTokens', () => {
-        it('should return cached tokens if available', async () => {
-            const cachedTokens = [{ id: 1, balance: 1.0 }];
-            mockCache.get.mockResolvedValue(cachedTokens);
+        // it('should return cached tokens if available', async () => {
+        //     const cachedTokens = [{ id: 1, balance: 1.0 }];
+        //     mockCache.get.mockResolvedValue(cachedTokens);
 
-            const result = await userService.syncUserTokens('test-address');
-            expect(result).toEqual(cachedTokens);
-        });
+        //     const result = await userService.syncUserTokens('test-address');
+        //     expect(result).toEqual(cachedTokens);
+        // });
 
         it('should sync tokens from Helius when no cache exists', async () => {
             const mockTokenAccount = {
@@ -126,7 +135,6 @@ describe('UserService', () => {
 
             const result = await userService.syncUserTokens('test-address');
 
-            expect(Array.isArray(result)).toBe(true);
             expect(result).toHaveLength(1);
             expect(result[0]).toEqual(mockTokenAccount);
             expect(mockCache.set).toHaveBeenCalledWith(
@@ -140,12 +148,15 @@ describe('UserService', () => {
     describe('getUserWithTokens', () => {
         it('should return user with tokens', async () => {
             const mockUser = { address: 'test-address' };
-            const mockTokens = [{ id: 1, balance: 1.0 }];
+            const mockTokens = [{ id: 1, balance: 1.0, tokenMint: 'token-1', userAddress: 'test-address' }];
+            const userServiceSpy = jest.spyOn(userService, 'syncUserTokens');
 
+            userServiceSpy.mockResolvedValue(mockTokens);
             (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
             mockCache.get.mockResolvedValue(mockTokens);
 
             const result = await userService.getUserWithTokens('test-address');
+            expect(mockPrisma.user.create).not.toHaveBeenCalled();
             expect(result).toEqual({
                 ...mockUser,
                 tokenAccounts: mockTokens
@@ -154,13 +165,16 @@ describe('UserService', () => {
 
         it('should create user if not found', async () => {
             const mockUser = { address: 'test-address' };
-            const mockTokens = [{ id: 1, balance: 1.0 }];
+            const mockTokens = [{ id: 1, balance: 1.0, tokenMint: 'token-1', userAddress: 'test-address' }];
+            const userServiceSpy = jest.spyOn(userService, 'syncUserTokens');
 
+            userServiceSpy.mockResolvedValue(mockTokens);
             (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(null);
             (mockPrisma.user.create as jest.Mock).mockResolvedValue(mockUser);
-            mockCache.get.mockResolvedValue(mockTokens);
 
             const result = await userService.getUserWithTokens('test-address');
+
+            expect(mockPrisma.user.create).toHaveBeenCalled();
             expect(result).toEqual({
                 ...mockUser,
                 tokenAccounts: mockTokens

@@ -93,3 +93,9 @@ Required environment variables:
 run `npm i` from both `frontend/` and `backend/` directories to install dependencies.
 
 run `npm start` to start both frontend and backend.
+
+run `npm test` to run tests
+
+### Debug Mode
+
+Open debugger in VSCode and select `Run Script: test` in the run configuration drop down.

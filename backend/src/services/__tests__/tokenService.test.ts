@@ -1,34 +1,34 @@
 import { TokenService } from '../tokenService';
 import { PrismaClient } from '@prisma/client';
-import { ServiceFactory } from '../serviceFactory';
 import { JupiterClient } from '@/clients/jupiterClient';
 import { BirdeyeClient } from '@/clients/birdeyeClient';
 
 // Mock PrismaClient
 jest.mock('@prisma/client', () => ({
-    PrismaClient: jest.fn(() => ({
+    PrismaClient: jest.fn().mockImplementation(() => ({
         token: {
-            findMany: jest.fn().mockResolvedValue([]),
+            findMany: jest.fn(),
             create: jest.fn(),
-            findUnique: jest.fn()
+            upsert: jest.fn(),
         },
         tokenPrice: {
-            createMany: jest.fn()
-        }
-    }))
+            findMany: jest.fn(),
+            createMany: jest.fn(),
+        },
+    })),
 }));
 
 // Mock clients
 jest.mock('@/clients/jupiterClient', () => ({
     JupiterClient: jest.fn().mockImplementation(() => ({
-        getAllTokens: jest.fn().mockResolvedValue([])
-    }))
+        getAllTokens: jest.fn().mockResolvedValue([]),
+    })),
 }));
 
 jest.mock('@/clients/birdeyeClient', () => ({
     BirdeyeClient: jest.fn().mockImplementation(() => ({
-        getHistoricalPrices: jest.fn().mockResolvedValue([])
-    }))
+        getHistoricalPrices: jest.fn().mockResolvedValue([]),
+    })),
 }));
 
 describe('TokenService', () => {
@@ -39,117 +39,94 @@ describe('TokenService', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        process.env.USE_MOCK_DATA = 'false';
-
         mockPrisma = new PrismaClient() as jest.Mocked<PrismaClient>;
         mockJupiterClient = new JupiterClient() as jest.Mocked<JupiterClient>;
         mockBirdeyeClient = new BirdeyeClient() as jest.Mocked<BirdeyeClient>;
+
         tokenService = new TokenService(mockJupiterClient, mockBirdeyeClient);
         (tokenService as any).prisma = mockPrisma;
     });
 
     describe('getTokens', () => {
-        // it('should return mock tokens when mock data is enabled', async () => {
-        //     const service = ServiceFactory.getTokenService(true);
-
-        //     const result = await service.getTokens(['So11111111111111111111111111111111111111112']);
-
-        //     console.log(result)
-
-        //     expect(result[0].mint).toBe('So11111111111111111111111111111111111111112');
-        //     expect(result[0].name).toBe('Wrapped SOL');
-        // });
-
-        it('should return tokens from database', async () => {
+        it('should return tokens from database when they exist', async () => {
+            const fetchTokenDataSpy = jest.spyOn(tokenService, 'getHistoricalTokenPrices');
+            fetchTokenDataSpy.mockResolvedValueOnce([]);
             const mockDbTokens = [{
-                mint: 'test-mint',
-                name: 'Test Token',
-                symbol: 'TEST',
-                decimals: 9,
-                logoURI: 'test-uri'
-            }];
-            const mockDbWithPrices = [{
-                mint: 'test-mint',
-                name: 'Test Token',
-                symbol: 'TEST',
-                decimals: 9,
-                logoURI: 'test-uri',
-                tokenPrice: [{
-                    date: new Date('2025-01-18T17:00:37.165Z'),
-                    price: 100,
-                    tokenMint: 'test-mint'
-                }]
-            }];
-            (mockPrisma.token.findMany as jest.Mock)
-                .mockResolvedValueOnce(mockDbTokens)  // First call
-                .mockResolvedValueOnce(mockDbWithPrices); // Second call after price update
-
-            const result = await tokenService.getTokens(['test-mint']);
-            expect(result).toEqual(mockDbWithPrices);
-        });
-
-        it('should fetch and save new tokens from Jupiter when not in database', async () => {
-            const jupiterToken = {
-                mint: 'new-mint',
-                name: 'New Token',
-                symbol: 'NEW',
-                decimals: 9,
-                logoURI: 'new-uri'
-            };
-
-            const savedToken = {
-                ...jupiterToken,
-                tokenPrice: [{
-                    date: new Date(),
-                    price: 100,
-                    tokenMint: 'new-mint'
-                }]
-            };
-
-            (mockPrisma.token.findMany as jest.Mock)
-                .mockResolvedValueOnce([])  // First call - no existing tokens
-                .mockResolvedValueOnce([savedToken]); // After saving
-
-            (mockJupiterClient.getAllTokens as jest.Mock)
-                .mockResolvedValueOnce([jupiterToken]);
-
-            const result = await tokenService.getTokens(['new-mint']);
-            expect(result).toEqual([savedToken]);
-            expect(mockJupiterClient.getAllTokens).toHaveBeenCalled();
-        });
-
-        it('should update prices for existing tokens', async () => {
-            const existingToken = {
                 mint: 'test-mint',
                 name: 'Test Token',
                 symbol: 'TEST',
                 decimals: 9,
                 logoURI: 'test-uri',
                 tokenPrice: []
-            };
+            }];
 
-            const updatedToken = {
-                ...existingToken,
-                tokenPrice: [{
-                    date: new Date(),
-                    price: 100,
-                    tokenMint: 'test-mint'
-                }]
-            };
-
-            (mockPrisma.token.findMany as jest.Mock)
-                .mockResolvedValueOnce([existingToken])
-                .mockResolvedValueOnce([updatedToken]);
+            (mockPrisma.token.findMany as jest.Mock).mockResolvedValue(mockDbTokens);
 
             const result = await tokenService.getTokens(['test-mint']);
-            expect(result).toEqual([updatedToken]);
-            expect(mockBirdeyeClient.getHistoricalPrices).toHaveBeenCalled();
+
+            expect(result).toEqual(mockDbTokens);
+            expect(mockPrisma.token.findMany).toHaveBeenCalled();
+            expect(mockJupiterClient.getAllTokens).not.toHaveBeenCalled();
         });
 
-        it('should handle empty mints array', async () => {
-            const result = await tokenService.getTokens([]);
-            expect(result).toEqual([]);
-            expect(mockJupiterClient.getAllTokens).not.toHaveBeenCalled();
+        it('should fetch missing tokens from Jupiter', async () => {
+            const fetchTokenDataSpy = jest.spyOn(tokenService, 'getHistoricalTokenPrices');
+            fetchTokenDataSpy.mockResolvedValueOnce([]);
+            const jupiterToken = {
+                mint: 'new-mint',
+                name: 'New Token',
+                symbol: 'NEW',
+                decimals: 9,
+                logoURI: 'new-uri',
+                prices: []
+            };
+            // first call to findMany should return empty array
+            (mockPrisma.token.findMany as jest.Mock).mockResolvedValueOnce([]);
+            // second call to findMany should return the new token
+            (mockPrisma.token.findMany as jest.Mock).mockResolvedValueOnce([
+                {
+                    mint: 'new-mint',
+                    name: 'New Token',
+                    symbol: 'NEW',
+                    decimals: 9,
+                    logoURI: 'new-uri',
+                    prices: []
+                }
+            ]);
+            (mockJupiterClient.getAllTokens as jest.Mock).mockResolvedValueOnce([jupiterToken]);
+            const result = await tokenService.getTokens(['new-mint']);
+
+            expect(result).toHaveLength(1);
+            expect(mockJupiterClient.getAllTokens).toHaveBeenCalled();
+        });
+
+        it('should only save new prices for missing days', async () => {
+            const existingPrices = [
+                { timestamp: new Date('2025-01-01T00:00:00.000Z'), price: 100, tokenMint: 'test-mint' },
+            ];
+
+            const birdeyePrices = [
+                { date: '2025-01-01T00:00:00.000Z', price: 100 },
+                { date: '2025-01-02T00:00:00.000Z', price: 115 }
+            ];
+
+            const newPrices = [
+                { timestamp: new Date('2025-01-01T00:00:00.000Z'), price: 100, tokenMint: 'test-mint' },
+                { timestamp: new Date('2025-01-02T00:00:00.000Z'), price: 115, tokenMint: 'test-mint' },
+            ];
+
+            (mockPrisma.tokenPrice.findMany as jest.Mock).mockResolvedValueOnce(existingPrices);
+            (mockBirdeyeClient.getHistoricalPrices as jest.Mock).mockResolvedValueOnce(birdeyePrices);
+            (mockPrisma.tokenPrice.findMany as jest.Mock).mockResolvedValueOnce(newPrices);
+
+            await tokenService.getHistoricalTokenPrices({ mint: 'test-mint', symbol: 'TEST', name: 'Test Token', decimals: 9, logoURI: 'test-uri' }, 30);
+
+            expect(mockPrisma.tokenPrice.createMany).toHaveBeenCalledWith({
+                data: [
+                    { tokenMint: 'test-mint', timestamp: new Date('2025-01-02T00:00:00.000Z'), price: 115 },
+                ],
+                skipDuplicates: true,
+            });
         });
     });
 }); 

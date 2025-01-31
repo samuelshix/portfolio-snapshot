@@ -1,6 +1,5 @@
 import { PrismaClient, Token, TokenPrice } from '@prisma/client';
 import { BirdeyeClient, birdeyeClient } from '@/clients/birdeyeClient';
-import axios from 'axios';
 import { JupiterClient, jupiterClient } from '@/clients/jupiterClient';
 
 export class TokenService {
@@ -23,16 +22,19 @@ export class TokenService {
     }
 
     async getTokens(mints: string[]): Promise<Token[]> {
-        // Get existing tokens with prices
-        const existingTokens = await this.prisma.token.findMany({
+        let existingTokens = await this.prisma.token.findMany({
             where: { mint: { in: mints } },
-            include: { tokenPrice: true }
+            include: { tokenPrice: true },
         });
 
-        // Find missing tokens
-        const existingMints = existingTokens.map((t: Token) => t.mint);
-        const missingMints = mints.filter(mint => !existingMints.includes(mint));
-
+        let missingMints;
+        if (existingTokens) {
+            const existingMints = existingTokens.map((t: Token) => t.mint);
+            missingMints = mints.filter((mint) => !existingMints.includes(mint));
+        } else {
+            existingTokens = [];
+            missingMints = mints;
+        }
         // Get and save missing tokens
         const newTokens = missingMints.length > 0
             ? await Promise.all(
@@ -41,7 +43,6 @@ export class TokenService {
             )
             : [];
 
-        // Update prices for all tokens
         await Promise.all(
             [...existingTokens, ...newTokens].map(token =>
                 this.getHistoricalTokenPrices(token, 30)
@@ -75,12 +76,35 @@ export class TokenService {
             const todayUnixTime = Math.floor(Date.now() / 1000);
             const fromTime = todayUnixTime - days * 24 * 60 * 60;
 
-            const prices = await this.birdeyeClient.getHistoricalPrices(
+            // Fetch existing prices for the last 30 days
+            const existingPrices = await this.prisma.tokenPrice.findMany({
+                where: {
+                    tokenMint: token.mint,
+                    timestamp: {
+                        gte: new Date(fromTime * 1000) // Convert to milliseconds
+                    }
+                }
+            });
+
+            // Create a set of existing dates
+            const existingDates = new Set(existingPrices.map(price => price.timestamp.toISOString().split('T')[0]));
+
+            // Fetch new prices
+            const allPrices = await this.birdeyeClient.getHistoricalPrices(
                 token.mint,
                 fromTime,
                 todayUnixTime
             );
-            await this.savePrices(token.mint, prices);
+
+            const newPrices = allPrices.filter(price => {
+                const priceDate = new Date(price.date).toISOString().split('T')[0];
+                return !existingDates.has(priceDate);
+            });
+
+            // Save only new prices
+            if (newPrices.length > 0) {
+                await this.savePrices(token.mint, newPrices);
+            }
 
             return this.prisma.tokenPrice.findMany({
                 where: { tokenMint: token.mint }

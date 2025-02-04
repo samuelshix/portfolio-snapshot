@@ -1,24 +1,14 @@
 {
   "name": "robinhood-solana",
   "private": true,
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
   "scripts": {
-    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
-    "start:frontend": "npm run start --workspace=frontend",
-    "start:backend": "npm run dev --workspace=backend",
-    "build": "npm run build --workspaces",
-    "install:all": "npm install --workspaces",
-    "dev": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
-    "test": "npm run test --workspaces",
+    "start": "concurrently \"cd frontend && npm run start\" \"cd backend && npm run dev\"",
+    "dev": "concurrently \"cd frontend && npm run start\" \"cd backend && npm run dev\"",
+    "test": "cd backend && npm test",
     "lint": "eslint ."
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.10.2",
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "eslint": "^8.0.0"
   }
 }

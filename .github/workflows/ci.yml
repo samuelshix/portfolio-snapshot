@@ -93,8 +93,9 @@ jobs:
       - name: Deploy Backend to Railway
         run: |
           cd backend
-          npm install
+          npm install --legacy-peer-deps
           npx prisma generate
           railway up --service token-retrieval-service
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

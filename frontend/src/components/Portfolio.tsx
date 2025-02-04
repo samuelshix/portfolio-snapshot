@@ -29,22 +29,23 @@ const Portfolio: FC = observer(() => {
 
     useEffect(() => {
         const calculatePortfolioValue = async () => {
-            console.log(tokenStore.tokenAccounts)
-            const valueByDay = getPortfolioValueByDay(tokenStore.tokenAccounts);
-            console.log(valueByDay)
-            setPortfolioValueByDay(valueByDay);
+            if (tokenStore.tokenAccounts.length > 0) {
+                const valueByDay = getPortfolioValueByDay(tokenStore.tokenAccounts);
+                console.log(valueByDay)
+                setPortfolioValueByDay(valueByDay);
 
-            const totalValue = valueByDay.reduce((total, dayValue) => {
-                return { date: dayValue.date, value: total.value + (dayValue.value || 0) };
-            }, { date: '', value: 0 }).value;
+                const totalValue = valueByDay.reduce((total, dayValue) => {
+                    return { date: dayValue.date, value: total.value + (dayValue.value || 0) };
+                }, { date: '', value: 0 }).value;
 
-            setTotalPortfolioValue(totalValue.toLocaleString('en-US', {
-                style: 'currency',
-                currency: 'USD',
-            }));
+                setTotalPortfolioValue(totalValue.toLocaleString('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                }));
+            }
         }
-        if (tokenStore.tokenAccounts.length > 0) calculatePortfolioValue();
-    }, []);
+        calculatePortfolioValue();
+    }, [tokenStore.tokenAccounts]);
 
 
     return (
@@ -57,8 +58,9 @@ const Portfolio: FC = observer(() => {
                 <div className="text-3xl font-bold mt-2">{totalPortfolioValue}</div>
                 {
                     portfolioValueByDay.length > 1 &&
-                    <div className="text-green-500 mt-1">    {((portfolioValueByDay[0].value - portfolioValueByDay[0].value) / portfolioValueByDay[1].value * 100).toFixed(2)}
-                        %</div>
+                    <div className="text-green-500 mt-1">
+                        {((portfolioValueByDay[0].value - portfolioValueByDay[1].value) / portfolioValueByDay[1].value * 100).toFixed(2)}%
+                    </div>
                 }
                 {/* Chart */}
                 <div className="mt-6">

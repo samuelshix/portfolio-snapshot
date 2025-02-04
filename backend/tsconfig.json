@@ -16,7 +16,15 @@
       "@/*": [
         "*"
       ]
-    }
+    },
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ],
+    "lib": [
+      "ES2020",
+      "DOM"
+    ]
   },
   "include": [
     "src/**/*"

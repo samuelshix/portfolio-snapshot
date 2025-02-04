@@ -1,5 +1,5 @@
 import { BirdeyeClient } from '../birdeyeClient';
-import getPriceMockData from '@/mockData/mockPriceData';
+import getPriceMockData from '../../mockData/mockPriceData';
 
 export class MockBirdeyeClient extends BirdeyeClient {
     async getCurrentPrice(): Promise<number> {

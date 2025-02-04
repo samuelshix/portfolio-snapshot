@@ -11,10 +11,10 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "noImplicitAny": true,
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "paths": {
       "@/*": [
-        "src/*"
+        "*"
       ]
     }
   },

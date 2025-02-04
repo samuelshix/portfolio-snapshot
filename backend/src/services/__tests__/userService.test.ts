@@ -1,11 +1,11 @@
 import { UserService } from '../userService';
 import { PrismaClient } from '@prisma/client';
 import { TokenService } from '../tokenService';
-import { Cache } from '@/utils/cache';
-import { HeliusClient } from '@/clients/heliusClient';
-import { HeliusBalancesResponse } from '@/types/heliusBalancesResponse';
-import { BirdeyeClient } from '@/clients/birdeyeClient';
-import { JupiterClient } from '@/clients/jupiterClient';
+import { Cache } from '../../utils/cache';
+import { HeliusClient } from '../../clients/heliusClient';
+import { HeliusBalancesResponse } from '../../types/heliusBalancesResponse';
+import { BirdeyeClient } from '../../clients/birdeyeClient';
+import { JupiterClient } from '../../clients/jupiterClient';
 import { ServiceFactory } from '../serviceFactory';
 
 // Mock PrismaClient

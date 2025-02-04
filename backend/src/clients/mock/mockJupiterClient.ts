@@ -1,6 +1,6 @@
 import { JupiterClient } from '../jupiterClient';
-import { jupiterAllTokensResponse } from '@/mockData/mockAPIDData';
-import { Token } from '@/types/token';
+import { jupiterAllTokensResponse } from '../../mockData/mockAPIDData';
+import { Token } from '../../types/token';
 
 export class MockJupiterClient extends JupiterClient {
     async getAllTokens(): Promise<Token[]> {

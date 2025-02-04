@@ -1,8 +1,8 @@
 import { PrismaClient, TokenAccount, User } from '@prisma/client';
 import { TokenService } from './tokenService';
-import { heliusClient } from '@/clients/heliusClient';
-import { Cache } from '@/utils/cache';
-import { RateLimiter } from '@/utils/rateLimiter';
+import { heliusClient } from '../clients/heliusClient';
+import { Cache } from '../utils/cache';
+import { RateLimiter } from '../utils/rateLimiter';
 import { ServiceFactory } from './serviceFactory';
 
 export class UserService {

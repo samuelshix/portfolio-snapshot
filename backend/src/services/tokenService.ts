@@ -1,6 +1,6 @@
 import { PrismaClient, Token, TokenPrice } from '@prisma/client';
-import { BirdeyeClient, birdeyeClient } from '@/clients/birdeyeClient';
-import { JupiterClient, jupiterClient } from '@/clients/jupiterClient';
+import { BirdeyeClient, birdeyeClient } from '../clients/birdeyeClient';
+import { JupiterClient, jupiterClient } from '../clients/jupiterClient';
 
 export class TokenService {
     private prisma: PrismaClient;

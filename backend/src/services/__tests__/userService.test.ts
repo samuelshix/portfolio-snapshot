@@ -51,7 +51,7 @@ describe('UserService', () => {
             getTokenBalances: jest.fn()
         } as unknown as jest.Mocked<HeliusClient>;
 
-        userService = new UserService(true);
+        userService = new UserService();
         // mockJupiterClient = new JupiterClient() as jest.Mocked<JupiterClient>;
         // mockBirdeyeClient = new BirdeyeClient() as jest.Mocked<BirdeyeClient>;
         (userService as any).prisma = mockPrisma;

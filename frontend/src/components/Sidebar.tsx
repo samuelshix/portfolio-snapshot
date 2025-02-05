@@ -7,6 +7,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = observer(({ tokenAccounts }) => {
+
     return (
         <div className="w-60 p-4 overflow-y-scroll">
             <div className="mt-4 border border-indigo-200/50 p-2 px-3 rounded-sm">

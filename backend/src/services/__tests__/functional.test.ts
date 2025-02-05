@@ -38,7 +38,7 @@ describe('Integration Test: UserService and TokenService', () => {
         jest.clearAllMocks();
         prisma = new PrismaClient() as jest.Mocked<PrismaClient>;
         tokenService = ServiceFactory.getTokenService(true);
-        userService = new UserService(true);
+        userService = new UserService();
 
         (tokenService as any).prisma = prisma;
         (userService as any).prisma = prisma;

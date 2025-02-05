@@ -13,7 +13,7 @@ const port = process.env.PORT || 5000;
 // Configure CORS for both development and production
 const allowedOrigins = [
     'http://localhost:3000',
-    'https://portfolio-snapshot.vercel.app/' // Add your Vercel domain here
+    'https://portfolio-snapshot.vercel.app'  // Remove trailing slash
 ];
 
 app.use(cors({

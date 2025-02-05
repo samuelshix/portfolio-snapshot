@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "start": "concurrently \"cd frontend && npm run start\" \"cd backend && npm run dev\"",
+    "start:prod-backend": "cd frontend && REACT_APP_API_BASE_URL=https://token-retrieval-service-production.up.railway.app npm start",
     "dev": "concurrently \"cd frontend && npm run start\" \"cd backend && npm run dev\"",
     "test": "cd backend && npm test",
     "lint": "eslint ."

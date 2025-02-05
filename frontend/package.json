@@ -32,10 +32,11 @@
     "crypto": false
   },
   "scripts": {
-    "start:prod": "cross-env REACT_APP_ENV=production react-app-rewired start",
     "start": "react-app-rewired start",
+    "start:local": "cp .env.development .env && react-app-rewired start",
+    "start:prod": "cp .env.production .env && react-app-rewired start",
     "build": "react-app-rewired build",
-    "test": "cd backend && npm run test",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "save-tokens": "ts-node scripts/saveAllTokenPrices.ts"
   },

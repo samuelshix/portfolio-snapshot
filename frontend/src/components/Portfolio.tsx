@@ -55,7 +55,7 @@ const Portfolio: FC = observer(() => {
                 {connectWalletMessage &&
                     <p className='text-sm text-slate-500'>{connectWalletMessage}</p>
                 }
-                <div className="text-3xl font-bold mt-2">{totalPortfolioValue}</div>
+                <div className="text-5xl font-semibold mt-2">{totalPortfolioValue}</div>
                 {
                     portfolioValueByDay.length > 1 &&
                     <div className="text-green-500 mt-1">

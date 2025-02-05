@@ -9,9 +9,9 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = observer(({ tokenAccounts }) => {
 
     return (
-        <div className="w-60 p-4 overflow-y-scroll">
-            <div className="mt-4 border border-indigo-200/50 p-2 px-3 rounded-sm">
-                <h2 className="text-sm font-semibold">Tokens</h2>
+        <div className="w-64 p-4 overflow-y-scroll">
+            <div className="mt-4 border border-indigo-200/50 p-2 px-3 rounded-sm rounded-xl">
+                <h2 className="text-lg font-semibold">Tokens</h2>
                 <div className="mt-1 space-y-1">
                     {tokenAccounts.map(account => {
                         let priceDelta = ((Number(account.token.tokenPrice[0].price) - Number(account.token.tokenPrice[1].price)) / Number(account.token.tokenPrice[1].price) * 100)
@@ -20,7 +20,7 @@ const Sidebar: React.FC<SidebarProps> = observer(({ tokenAccounts }) => {
                         // Add null check for token and prices
                         if (!account.token || !account.token.tokenPrice || account.token.tokenPrice.length === 0) {
                             return (
-                                <div key={account.token?.mint || 'unknown'} className="flex justify-between items-center border-b border-gray-700 py-3 text-[10px] last:border-none">
+                                <div key={account.token?.mint || 'unknown'} className="flex justify-between items-center border-b border-gray-700 py-3 text-md last:border-none">
                                     <div>
                                         <p className="font-bold">{account.token?.symbol || 'Unknown'}</p>
                                         <p className="font-light">No price data</p>
@@ -32,15 +32,13 @@ const Sidebar: React.FC<SidebarProps> = observer(({ tokenAccounts }) => {
                         return (
                             <div
                                 key={account.token.mint}
-                                className="flex justify-between items-center border-b border-gray-700 py-3 text-[10px] last:border-none"
+                                className="flex justify-between items-center border-b border-gray-700 py-3 text-md last:border-none"
                             >
                                 <div>
                                     <p className="font-bold">{account.token.symbol}</p>
                                     <p className={"font-light"}>
-                                        {account.token?.tokenPrice?.length > 0 && !isNaN(account.token.tokenPrice[0].price) && !isNaN(account.balance)
-                                            ? (Number(account.balance) * Number(account.token.tokenPrice[0].price))
-                                                .toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-                                            : '$0.00'
+                                        {account.balance && (Number(account.balance))
+
                                         }
                                     </p>
                                 </div>

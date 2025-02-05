@@ -1,22 +1,34 @@
 import { TokenAccount } from "../types/tokenAccount";
 
 export const getPortfolioValueByDay = (assets: TokenAccount[]) => {
-    console.log(assets)
-    return assets.reduce((acc: { date: string, value: number }[], asset) => {
+    // Create a map to store total value for each date
+    const valuesByDate = new Map<string, number>();
+
+    // Process each asset
+    assets.forEach(asset => {
         const balance = asset.balance;
-        asset.token.tokenPrice.forEach((price, index) => {
-            const date = price.timestamp;
-            const existingEntry = acc.find(entry => entry.date === date);
-            if (existingEntry) {
-                existingEntry.value += (balance * price.price) / Math.pow(10, asset.token.decimals);
-            } else {
-                console.log(balance, price.price, asset.token.decimals)
-                acc.push({
-                    date,
-                    value: (balance * price.price)
-                });
-            }
+        const decimals = asset.token.decimals;;
+
+        // Process each price point for this asset
+        asset.token.tokenPrice.forEach(price => {
+            const date = new Date(price.timestamp).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            const value = balance * price.price;
+
+            // Add to existing value for this date or set new value
+            valuesByDate.set(date, (valuesByDate.get(date) || 0) + value);
         });
-        return acc;
-    }, []);
+    });
+
+    // Convert map to array
+    const result = Array.from(valuesByDate.entries())
+        .map(([date, value]) => ({
+            date,
+            value
+        }));
+    return result;
 }

@@ -107,7 +107,10 @@ export class TokenService {
             }
 
             return this.prisma.tokenPrice.findMany({
-                where: { tokenMint: token.mint }
+                where: { tokenMint: token.mint },
+                orderBy: {
+                    timestamp: 'desc'
+                }
             });
 
         } catch (error) {

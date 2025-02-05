@@ -12,6 +12,7 @@ const Portfolio: FC = observer(() => {
     const [connectWalletMessage, setMessage] = useState<string>('');
     const [portfolioValueByDay, setPortfolioValueByDay] = useState<{ date: string, value: number }[]>([]);
     const [totalPortfolioValue, setTotalPortfolioValue] = useState<string>('0.00');
+    const [deltaColor, setDeltaColor] = useState<string>('rgb(0, 255, 0)');
 
     useEffect(() => {
         const fetchAssets = async () => {
@@ -33,10 +34,9 @@ const Portfolio: FC = observer(() => {
                 const valueByDay = getPortfolioValueByDay(tokenStore.tokenAccounts);
                 console.log(valueByDay)
                 setPortfolioValueByDay(valueByDay);
+                setDeltaColor(valueByDay[0].value > valueByDay[1].value ? 'rgb(0, 255, 0)' : 'rgb(255, 0, 0)');
+                const totalValue = valueByDay[0].value
 
-                const totalValue = valueByDay.reduce((total, dayValue) => {
-                    return { date: dayValue.date, value: total.value + (dayValue.value || 0) };
-                }, { date: '', value: 0 }).value;
 
                 setTotalPortfolioValue(totalValue.toLocaleString('en-US', {
                     style: 'currency',
@@ -55,21 +55,23 @@ const Portfolio: FC = observer(() => {
                 {connectWalletMessage &&
                     <p className='text-sm text-slate-500'>{connectWalletMessage}</p>
                 }
-                <div className="text-5xl font-semibold mt-2">{totalPortfolioValue}</div>
-                {
-                    portfolioValueByDay.length > 1 &&
-                    <div className="text-green-500 mt-1">
-                        {((portfolioValueByDay[0].value - portfolioValueByDay[1].value) / portfolioValueByDay[1].value * 100).toFixed(2)}%
+                <div className='grid grid-cols-10 my-10'>
+                    <div className='col-span-9'>
+                        <div className="text-5xl font-semibold mt-2">{totalPortfolioValue}</div>
+                        <div className="mt-1" style={{ color: deltaColor }}>
+                            {((portfolioValueByDay[0].value - portfolioValueByDay[1].value) / portfolioValueByDay[1].value * 100).toFixed(2)}%
+                        </div>
+                        {/* Chart */}
+                        <div className="h-40 rounded-md mr-10">
+                            <PriceChart portfolioValueByDay={portfolioValueByDay} deltaColor={deltaColor} />
+                        </div>
                     </div>
-                }
-                {/* Chart */}
-                <div className="mt-6">
-                    <div className="h-40 bg-gray-800 rounded-md"> {/* Placeholder for Chart */}
-                        <PriceChart portfolioValueByDay={portfolioValueByDay} />
-                    </div>
-                </div>
+                    <div className='col-span-1'>
 
-                {/* Buying Power */}
+                        <Sidebar tokenAccounts={tokenStore.tokenAccounts} />
+                    </div>
+                    {/* Buying Power */}
+                </div>
                 <div className="mt-4">
                     <div className="text-sm text-gray-400">Buying Power</div>
                     <div className="font-semibold">0</div>
@@ -91,7 +93,6 @@ const Portfolio: FC = observer(() => {
                     </div>
                 </div> */}
             </div>
-            <Sidebar tokenAccounts={tokenStore.tokenAccounts} />
         </>
     );
 });

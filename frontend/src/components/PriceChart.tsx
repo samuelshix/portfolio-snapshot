@@ -7,10 +7,11 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 interface PriceChartProps {
     portfolioValueByDay: { date: string, value: number }[];
+    deltaColor: string;
 }
 
-const PriceChart: React.FC<PriceChartProps> = ({ portfolioValueByDay }) => {
 
+const PriceChart: React.FC<PriceChartProps> = ({ portfolioValueByDay, deltaColor }) => {
     const portfolioValueList = portfolioValueByDay
         .map(entry => ({
             date: entry.date,
@@ -24,7 +25,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ portfolioValueByDay }) => {
             {
                 label: 'Portfolio Value',
                 data: portfolioValueList.map(entry => entry.totalValue),
-                borderColor: 'rgb(0, 255, 0)', // Green line color
+                borderColor: deltaColor, // Green line color
                 backgroundColor: 'rgba(0, 255, 0, 0.2)', // Optional area below the line
                 tension: 0.2, // Smoother curve
                 pointRadius: 0, // No points visible
@@ -79,9 +80,10 @@ const PriceChart: React.FC<PriceChartProps> = ({ portfolioValueByDay }) => {
         },
     };
 
-    return <div style={{ backgroundColor: 'black', padding: '20px' }}>
+    return <div className='rounded-xl p-5'>
         <Line data={chartData} options={chartOptions} />
     </div>;
+
 }
 
 export default PriceChart;

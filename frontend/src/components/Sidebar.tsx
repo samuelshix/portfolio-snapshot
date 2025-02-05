@@ -9,8 +9,8 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = observer(({ tokenAccounts }) => {
 
     return (
-        <div className="w-64 p-4 overflow-y-scroll">
-            <div className="mt-4 border border-indigo-200/50 p-2 px-3 rounded-sm rounded-xl">
+        <div>
+            <div className="border border-indigo-200/30 p-2 px-3 rounded-sm rounded-xl">
                 <h2 className="text-lg font-semibold">Tokens</h2>
                 <div className="mt-1 space-y-1">
                     {tokenAccounts.map(account => {

@@ -11,7 +11,8 @@ export class UserService {
     private cache: Cache;
     private heliusClient;
 
-    constructor(useMockData: boolean) {
+    constructor() {
+        const useMockData = process.env.USE_MOCK_DATA !== 'false';  // Use mock data unless explicitly set to 'false'
         this.prisma = new PrismaClient();
         this.tokenService = ServiceFactory.getTokenService(useMockData);
         this.heliusClient = ServiceFactory.getHeliusClient(useMockData);

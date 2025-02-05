@@ -5,8 +5,7 @@ export class UserController {
     private userService: UserService;
 
     constructor() {
-        const useMockData = process.env.USE_MOCK_DATA === 'true';
-        this.userService = new UserService(useMockData);
+        this.userService = new UserService();
     }
 
     getUser: RequestHandler = async (req, res) => {

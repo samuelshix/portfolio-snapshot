@@ -174,7 +174,7 @@ export class TradeHistoryService {
         const prices = await Promise.all(
             chunks.map(async tokenChunk =>
                 Promise.all(tokenChunk.map(token =>
-                    this.birdeyeClient.getHistoricalPrices(token, timestamp)
+                    this.birdeyeClient.getHistoricalPrices(token, timestamp, timestamp + 60, '1M')
                 ))
             )
         );
@@ -182,15 +182,25 @@ export class TradeHistoryService {
     }
 
     // Batch database operations
-    async batchSaveTrades(trades: Trade[]) {
-        const chunks = chunk(trades, 100);
-        await Promise.all(
-            chunks.map(chunk =>
-                this.prisma.trade.createMany({
-                    data: chunk,
-                    skipDuplicates: true
-                })
-            )
-        );
-    }
+    // async batchSaveTrades(trades: Trade[], address: string) {
+    //     const chunks = chunk(trades, 100);
+    //     await Promise.all(
+    //         chunks.map(chunk =>
+    //             this.prisma.trade.createMany({
+    //                 data: chunk.map(trade => ({
+    //                     signature: trade.signature,
+    //                     userAddress: address,
+    //                     timestamp: new Date(trade.timestamp * 1000),
+    //                     tokenInMint: trade.tokenIn.mint,
+    //                     tokenInAmount: trade.tokenIn.amount,
+    //                     tokenOutMint: trade.tokenOut.mint,
+    //                     tokenOutAmount: trade.tokenOut.amount,
+    //                     tokenInPrice: trade.tokenInPrice || 0,
+    //                     tokenOutPrice: trade.tokenOutPrice || 0
+    //                 })),
+    //                 skipDuplicates: true
+    //             })
+    //         )
+    //     );
+    // }
 } 

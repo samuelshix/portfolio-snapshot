@@ -173,7 +173,7 @@ export class TradeHistoryService {
         const chunks = chunk(tokens, 10); // Process 10 tokens at a time
         const prices = await Promise.all(
             chunks.map(async tokenChunk =>
-                Promise.all(tokenChunk.map(token =>
+                Promise.all(tokenChunk.map((token: string) =>
                     this.birdeyeClient.getHistoricalPrices(token, timestamp, timestamp + 60, '1M')
                 ))
             )

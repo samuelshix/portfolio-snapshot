@@ -100,3 +100,4 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          USE_MOCK_DATA: ${{ env.USE_MOCK_DATA }}

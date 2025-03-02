@@ -1,6 +1,6 @@
 # Solana Token Portfolio Tracker
 
-A full-stack application that tracks token balances and prices for Solana wallets, providing historical price data and portfolio management capabilities.
+A full-stack application that tracks token balances and prices for Solana wallets, providing historical price data and portfolio management capabilities (currently using Mock Data).
 
 ## Architecture Overview
 
